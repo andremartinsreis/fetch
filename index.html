@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form id="login-form" class="login-form">
+        <label>
+            Email: <input type="text" name="email" id="email">
+        </label>
+
+        <label>
+            Password: <input type="text" name="password" id="password">
+        </label>
+
+        <div id="error" class="error"></div>
+        <button>
+            <img class="spinner" src="https://powerusers.microsoft.com/t5/image/serverpage/image-id/118082i204C32E01666789C/image-size/large/is-moderation-mode/true?v=v2&px=999" alt="loader">
+            Logar
+        </button>
+        <button type="button">Cancelar</button>
+    </form>
+
+    <style>
+        .login-form .spinner {
+            width: 10px;
+            display: none;
+        }
+
+        .login-form.loading button {
+            opacity: .3;
+            pointer-events: none;
+        }
+
+        .login-form.loading .spinner {
+            display: inline;  
+        }
+
+        .error {
+            font-size: 10px;
+            color: red;
+        }
+    </style>
+
+    <script>
+        const apiURL = 'https://172b-191-190-105-36.ngrok-free.app'
+        const form = document.getElementById('login-form')
+        const emailInput = document.getElementById('email')
+        const passwordInput = document.getElementById('password')
+        const errorElement = document.getElementById('error')
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault()
+            form.classList.add('loading')
+            errorElement.innerText = ''
+
+            fetch(
+                apiURL + '/auth',
+                {
+                    method: 'POST',
+                    headers: {"Content-type": "application/json;charset=UTF-8"},
+                    body: JSON.stringify({
+                        email: emailInput.value,
+                        password: passwordInput.value
+                    })
+                }
+            ).then((response) => {
+                response.json().then((responseBody) => {
+                    console.log({ responseBody })
+                    console.log({ response })
+                    if (response.status === 401) {
+                        errorElement.innerText = responseBody.error
+                    } else {
+                        form.innerHTML = '<h1>' + responseBody.token + '</h1>'
+                    }
+                }).catch(() => {
+                    errorElement.innerText = 'Um erro inesperado aconteceu, tente novamente mais tarde'
+                }).finally(() => {
+                    form.classList.remove('loading')
+                })
+            })
+        })
+    </script>
+</body>
+</html>
